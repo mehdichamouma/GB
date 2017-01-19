@@ -9,7 +9,6 @@ import {expect} from "chai"
 import config from "../../../config"
 
 describe("DB", () => {
-
   before(() => {
     return initDatabase({
       host     : config.DB.HOST,
@@ -17,12 +16,8 @@ describe("DB", () => {
       password : config.DB.PASSWORD,
       multipleStatements: true
     }, config.DB.NAME)
+    .then(() => resetDb())
   })
-
-  beforeEach(() => {
-    return resetDb()
-  })
-
 
   describe("getUser", () => {
     it("should return an user", () => {
