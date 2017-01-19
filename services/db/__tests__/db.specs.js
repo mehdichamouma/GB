@@ -8,8 +8,8 @@ import resetDb from "../../../resetDb"
 import {expect} from "chai"
 import config from "../../../config"
 
-describe("DB", () => {
-
+describe("DB", function() {
+  this.timeout(0)
   before(() => {
     return initDatabase({
       host     : config.DB.HOST,
