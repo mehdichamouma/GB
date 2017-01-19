@@ -6,16 +6,17 @@ import {
 
 import resetDb from "../../../resetDb"
 import {expect} from "chai"
+import config from "../../../config"
 
 describe("DB", () => {
 
   before(() => {
     return initDatabase({
-      host     : 'localhost',
-      user     : 'root',
-      password : 'iut',
+      host     : config.DB.HOST,
+      user     : config.DB.USER,
+      password : config.DB.PASSWORD,
       multipleStatements: true
-    }, "iut")
+    }, config.DB.NAME)
   })
 
   beforeEach(() => {
