@@ -17,12 +17,8 @@ describe("DB", function() {
       password : config.DB.PASSWORD,
       multipleStatements: true
     }, config.DB.NAME)
+    .then(() => resetDb())
   })
-
-  beforeEach(() => {
-    return resetDb()
-  })
-
 
   describe("getUser", () => {
     it("should return an user", () => {
