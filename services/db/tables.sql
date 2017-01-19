@@ -10,7 +10,7 @@ drop table if exists CONTAIN;
 
 drop table if exists MANAGE;
 
-drop table if exists ORDER;
+drop table if exists ORDERS;
 
 drop table if exists PLACE;
 
@@ -58,7 +58,7 @@ create table MANAGE
 /*==============================================================*/
 /* Table : "ORDER"                                              */
 /*==============================================================*/
-create table ORDER
+create table ORDERS
 (
    ORDERNUMBER          int not null auto_increment,
    STATUS               text,
@@ -152,7 +152,7 @@ create table USER
 );
 
 alter table CONTAIN add constraint FK_CONTAIN foreign key (ORDERNUMBER)
-      references ORDER (ORDERNUMBER) on delete restrict on update restrict;
+      references ORDERS (ORDERNUMBER) on delete restrict on update restrict;
 
 alter table CONTAIN add constraint FK_CONTAIN2 foreign key (PRODUCTNUMBER)
       references PRODUCT (PRODUCTNUMBER) on delete restrict on update restrict;
