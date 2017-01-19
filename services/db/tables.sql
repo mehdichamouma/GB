@@ -58,7 +58,7 @@ create table MANAGE
 /*==============================================================*/
 /* Table : "ORDER"                                              */
 /*==============================================================*/
-create table "ORDER"
+create table ORDER
 (
    ORDERNUMBER          int not null auto_increment,
    STATUS               text,
