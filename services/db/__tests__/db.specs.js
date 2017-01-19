@@ -10,31 +10,29 @@ import config from "../../../config"
 
 describe("DB", function() {
   this.timeout(0)
-  before(() => {
-    return initDatabase({
+  before(async () => {
+    await initDatabase({
       host     : config.DB.HOST,
       user     : config.DB.USER,
       password : config.DB.PASSWORD,
       multipleStatements: true
     }, config.DB.NAME)
-    .then(() => resetDb())
+    await resetDb()
   })
 
   describe("getUser", () => {
-    it("should return an user", () => {
-      return getUser("1").then((user) => {
-        expect(user.USERNUMBER).to.eql(1)
-        expect(user.EMAIL).to.eql("abc@john.fr")
-      })
+    it("should return an user", async () => {
+      let user = await getUser("1")
+      expect(user.USERNUMBER).to.eql(1)
+      expect(user.EMAIL).to.eql("abc@john.fr")
     })
   })
 
 
   describe("getAllUsers", () => {
-    it("should return all the users", () => {
-      return getAllUsers(1).then((user) => {
-
-      })
+    it("should return all the users", async () => {
+      let users = await getAllUsers(1)
+      expect(users).to.have.a.lengthOf(2)
     })
   })
 

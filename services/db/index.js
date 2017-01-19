@@ -7,15 +7,13 @@ let connection
 let query
 let dbName
 
-export const clearDatabase = () => {
-  return query("DROP database if exists ??;", [dbName])
-  .then(() => query("CREATE database ??;", [dbName]))
-  .then(() => query("USE ??;", [dbName]))
-  .then(() => {
-    let sqlFilePath = path.join(__dirname, "tables.sql")
-    return fs.readFile(sqlFilePath, 'utf8')
-  })
-  .then(sqlQuery => query(sqlQuery))
+export const clearDatabase = async () => {
+  await query("DROP database if exists ??;", [dbName])
+  await query("CREATE database ??;", [dbName])
+  await query("USE ??;", [dbName])
+  let sqlFilePath = path.join(__dirname, "tables.sql")
+  let sqlQuery = await fs.readFile(sqlFilePath, 'utf8')
+  await query(sqlQuery)
 }
 
 export const initDatabase = (dbInfos, _dbName) => {
@@ -38,11 +36,8 @@ export const initDatabase = (dbInfos, _dbName) => {
 }
 
 
-export const createUser = (data) => {
-  return query("INSERT INTO USER SET ?", data)
-  .then(() => {
-
-  })
+export const createUser = async (data) => {
+  return await query("INSERT INTO USER SET ?", data)
 }
 
 export const getUser = async (id) => {
@@ -50,6 +45,6 @@ export const getUser = async (id) => {
   return results[0]
 }
 
-export const getAllUsers = () => {
-  return query("SELECT * FROM User")
+export const getAllUsers = async () => {
+  return await query("SELECT * FROM User")
 }
