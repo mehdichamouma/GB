@@ -45,3 +45,25 @@ export const updateSubCategory = async (subCategory) => {
 export const getSubCategory = async (subCategory) => {
   return await DB.getSubCategory(subCategory)
 }
+
+
+export const getProvider = async (place) => {
+  let placeFromDb = await DB.getProvider(place)
+  if(!placeFromDb) {
+    return Promise.reject("User not found")
+  }
+  return placeFromDb
+}
+
+export const getAllProviders = async () => {
+  return await DB.getAllProviders()
+}
+
+export const createProvider = async (place) => {
+  return await DB.createProvider(place)
+}
+
+
+export const updateProvider = async (place) => {
+  return await DB.updateProvider(place)
+}

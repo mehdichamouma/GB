@@ -107,3 +107,18 @@ export const editSubCategory = (catNumber, scNumber, data) => request('/categori
   body: data,
   method: 'PUT'
 })
+
+
+export const getProviders = () => request("/providers/")
+
+export const getProvider = (number) => request("/providers/" + number)
+
+export const editProvider = (number, data) => request("/providers/" + number, {
+  body: data,
+  method: 'PUT'
+})
+
+export const createProvider = (data) => request("/providers/", {
+  body: data,
+  method: 'POST'
+})

@@ -9,6 +9,7 @@ let dbName
 
 import {
   User,
+  Provider,
   Place,
   Category,
   SubCategory
@@ -137,10 +138,11 @@ export const createPlace = async (place) => {
 }
 
 export const updatePlace = async (place) => {
+
+  let {PLACENUMBER, ...placeData} = place
   let data = parsePlace(placeData)
-  let {PLACENUMBER, ...placeData} = data
   return await query("UPDATE PLACE SET ? WHERE PLACENUMBER = ?", [
-    placeData,
+    data,
     PLACENUMBER
   ])
 }
@@ -320,3 +322,56 @@ const parseSubCategory = (subCategory) => {
   }
   return local
 }
+
+/* Providers */
+
+export const createProvider = async (provider) => {
+  return await query("INSERT INTO PROVIDER SET ?", parseProvider(provider))
+}
+
+export const updateProvider = async (provider) => {
+
+  let {PROVIDERNUMBER, ...providerData} = parseProvider(provider)
+  return await query("UPDATE PROVIDER SET ? WHERE PROVIDERNUMBER = ?", [
+    providerData,
+    PROVIDERNUMBER
+  ])
+}
+
+export const getProvider = async (provider) => {
+  let results = await query("SELECT * FROM PROVIDER WHERE PROVIDERNUMBER = ?", [provider.number])
+  let placeFromDb = results[0]
+  if(placeFromDb) {
+    return toProvider(placeFromDb)
+  }
+  else {
+    return null
+  }
+}
+
+export const getAllProviders = async () => {
+  let places = await query("SELECT * FROM PROVIDER")
+  return places.map(toProvider)
+}
+
+const toProvider = (local) => new Provider({
+  number: local.PROVIDERNUMBER,
+  name: local.PROVIDERNAME,
+  adress: local.PROVIDERADRESS,
+  postCode: local.PROVIDERPOSTCODE,
+  city: local.PROVIDERCITY,
+  phoneNumber: local.PROVIDERPHONE,
+  fax: local.PROVIDERFAX,
+  email: local.PROVIDERMAIL,
+})
+
+const parseProvider = (provider) => ({
+  PROVIDERNUMBER: provider.number ,
+  PROVIDERNAME: provider.name ,
+  PROVIDERADRESS: provider.adress ,
+  PROVIDERPOSTCODE: provider.postCode ,
+  PROVIDERCITY: provider.city ,
+  PROVIDERPHONE: provider.phoneNumber ,
+  PROVIDERFAX: provider.fax ,
+  PROVIDERMAIL: provider.email ,
+})

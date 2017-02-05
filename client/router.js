@@ -37,6 +37,8 @@ import Categories from "./Views/Categories/Categories.vue"
 import EditCategory from "./Views/Categories/EditCategory.vue"
 import EditSubCategory from "./Views/Categories/EditSubcategory.vue"
 import ShowCategory from "./Views/Categories/ShowCategory.vue"
+import Providers from "./Views/Providers/Providers.vue"
+import EditProvider from "./Views/Providers/EditProvider.vue"
 
 const router = new VueRouter({
   routes: [
@@ -87,7 +89,16 @@ const router = new VueRouter({
               component: EditSubCategory
             }
           ]
-        }
+        },
+        {
+          path: 'providers',
+          component: UsersLayout,
+          children: [
+            {path: '', name: "providers", component: Providers},
+            {path: 'create', name: "createProvider", component: EditProvider},
+            {path: 'edit/:number', name: "editProvider", component: EditProvider}
+          ]
+        },
       ]
     },
     {

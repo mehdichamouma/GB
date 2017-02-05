@@ -2,20 +2,20 @@ import express from "express"
 let router = express.Router()
 
 import {
-  createPlace,
-  getAllPlaces,
-  updatePlace,
-  getPlace
-} from "../services/products.service"
+  createProvider,
+  getAllProviders,
+  updateProvider,
+  getProvider
+} from "../services/products.service.js"
 
 import {
-  Place
+  Provider
 } from "../models"
 
 router.get("/", async (req, res) => {
   try {
-    let places = await getAllPlaces()
-    res.json(places)
+    let providers = await getAllProviders()
+    res.json(providers)
   } catch (e) {
     console.error(e);
     res.status(500).json("error")
@@ -24,9 +24,9 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    let place = new Place(req.body)
-    let placeCreated = await createPlace(place)
-    res.json(placeCreated)
+    let provider = new Provider(req.body)
+    let providerCreated = await createProvider(provider)
+    res.json(providerCreated)
   }
   catch (e) {
     console.error(e);
@@ -37,11 +37,11 @@ router.post("/", async (req, res) => {
 
 router.get("/:number", async (req, res) => {
   try {
-    let place = await getPlace(new Place({
+    let provider = await getProvider(new Provider({
       number: req.params.number
     }))
-    if(place) {
-      res.json(place)
+    if(provider) {
+      res.json(provider)
     }
     else {
       res.status(404).json("Ressource not found")
@@ -54,12 +54,12 @@ router.get("/:number", async (req, res) => {
 
 router.put("/:number", async (req, res) => {
   try {
-    let place = new Place({
+    let provider = new Provider({
       number: req.params.number,
       ...req.body
     })
-    await updatePlace(place)
-    res.json(place)
+    await updateProvider(provider)
+    res.json(provider)
   }
   catch (e) {
     console.error(e);

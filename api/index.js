@@ -6,6 +6,7 @@ import me from "./me"
 import users from "./users"
 import places from "./places"
 import categories from "./categories"
+import providers from "./providers"
 
 let api = express.Router()
 
@@ -16,6 +17,8 @@ api.use("/me", me)
 api.use("/users", users)
 api.use("/places", places)
 api.use("/categories", categories)
+api.use("/providers", providers)
+
 // api.get("/me", (req, res) => {
 //   if(req.user != null) {
 //     Promise.all([
