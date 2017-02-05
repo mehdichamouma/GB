@@ -9,7 +9,9 @@ let dbName
 
 import {
   User,
-  Place
+  Place,
+  Category,
+  SubCategory
 } from "../../models"
 
 export const clearDatabase = async () => {
@@ -89,13 +91,7 @@ export const getUserByNumber = async (number) => {
 
 export const getAllUsers = async () => {
   let users = await query("SELECT * FROM User")
-  return users.map(u => new User({
-    username: u.USERNAME,
-    email: u.EMAIL,
-    role: u.ROLE,
-    title: u.TITLE,
-    number: u.USERNUMBER
-  }))
+  return users.map(toUser)
 }
 
 export const getUserByCredentials = async (email, password) => {
@@ -104,19 +100,22 @@ export const getUserByCredentials = async (email, password) => {
     [email, password]
   )
   let userFromDb = results[0]
+  console.log(userFromDb);
   if(userFromDb) {
-    return new User({
-      username: userFromDb.USERNAME,
-      email: userFromDb.EMAIL,
-      role: userFromDb.ROLE,
-      title: userFromDb.TITLE,
-      number: userFromDb.USERNUMBER
-    })
+    return toUser(userFromDb)
   }
   else {
     return null
   }
 }
+
+const toUser = (local) => new User({
+  username: local.USERNAME,
+  email: local.EMAIL,
+  role: local.ROLE,
+  title: local.TITLE,
+  number: local.USERNUMBER
+})
 
 /* PRODUCTS */
 
@@ -175,3 +174,149 @@ const parsePlace = (place) => ({
   PLACEFLOOR: place.placeFloor,
   PLACETYPE: place.placeType,
 })
+
+/* Categories */
+
+export const getAllCategories = async () => {
+  let categories = await query(`
+    SELECT c.*, u.*, sc.*
+    FROM CATEGORY c
+      LEFT JOIN MANAGE AS m ON m.CATEGORYNUMBER = c.CATEGORYNUMBER
+      LEFT JOIN USER AS u ON u.USERNUMBER = m.USERNUMBER
+      LEFT JOIN SUBCATEGORY AS sc ON c.CATEGORYNUMBER = sc.CATEGORYNUMBER
+  `)
+  return toCategories(categories)
+}
+
+export const createCategory = async (category) => {
+  let res = await query("INSERT INTO CATEGORY SET ?", parseCategory(category))
+  let insertedCategory = new Category({
+    ...category,
+    number: res.insertId
+  })
+  await addCategoryManager(insertedCategory, category.managedBy)
+  return insertedCategory
+}
+
+export const addCategoryManager = async (category, user) => {
+  return await query("INSERT INTO MANAGE SET ?", {
+    USERNUMBER: user.number,
+    CATEGORYNUMBER: category.number
+  })
+}
+
+export const updateCategory = async (category) => {
+  let data = parseCategory(category)
+  let {CATEGORYNUMBER, ...categoryData} = data
+  await query("UPDATE CATEGORY SET ? WHERE CATEGORYNUMBER = ?", [
+    categoryData,
+    CATEGORYNUMBER
+  ])
+  return await query("UPDATE MANAGE SET ? WHERE CATEGORYNUMBER = ?", [{
+      USERNUMBER: category.managedBy.number
+    },
+    CATEGORYNUMBER
+  ])
+}
+
+export const getCategory = async (category) => {
+  let results = await query(`
+    SELECT c.*, u.*, sc.*
+    FROM CATEGORY c
+      LEFT JOIN MANAGE AS m ON m.CATEGORYNUMBER = c.CATEGORYNUMBER
+      LEFT JOIN USER AS u ON u.USERNUMBER = m.USERNUMBER
+      LEFT JOIN SUBCATEGORY AS sc ON c.CATEGORYNUMBER = sc.CATEGORYNUMBER
+    WHERE c.CATEGORYNUMBER = ?
+  `, [category.number])
+  return toCategories(results)[0]
+}
+
+const toCategory = (local) => {
+  let data = {
+    number: local.CATEGORYNUMBER,
+    name: local.CATEGORYNAME
+  }
+  return new Category(data)
+}
+
+const toCategories = (local) => {
+  return local.reduce((rows, data) => {
+    let category = toCategory(data)
+    let managedBy = toUser(data)
+    let subCategory = toSubCategory(data)
+    let index = rows.findIndex(r => r.number == category.number)
+    if(index == -1) {
+      category.managedBy = managedBy
+      category.subCategories = [subCategory]
+      rows.push(category)
+    }
+    else {
+      rows[index].subCategories.push(subCategory)
+    }
+    return rows
+  }, [])
+}
+
+const parseCategory = (category) => {
+  let local = {
+    CATEGORYNAME: category.name,
+    CATEGORYNUMBER: category.number
+  }
+  return local
+}
+
+
+/* SubCategories */
+
+export const createSubCategory = async (subCategory) => {
+  return await query("INSERT INTO SUBCATEGORY SET ?", parseSubCategory(subCategory))
+}
+
+export const updateSubCategory = async (subCategory) => {
+  let data = parsePlace(placeData)
+  let {PLACENUMBER, ...placeData} = data
+  return await query("UPDATE CATEGORY SET ? WHERE PLACENUMBER = ?", [
+    placeData,
+    PLACENUMBER
+  ])
+}
+
+export const getSubCategory = async (subCategory) => {
+  let results = await query(`
+    SELECT *
+    FROM SUBCATEGORY c
+    WHERE c.SUBCATEGORYNUMBER = ?
+  `, [subCategory.number])
+  let scFromDb = results[0]
+  if(scFromDb) {
+    let sc = toSubCategory(scFromDb)
+    return sc
+  }
+  else {
+    return null
+  }
+}
+
+const toSubCategory = (local) => {
+  let data = {
+    number: local.SUBCATEGORYNUMBER,
+    name: local.SUBCATEGORYNAME,
+  }
+  if(local.CATEGORYNUMBER) {
+    data.category = {
+      number: local.CATEGORYNUMBER
+    }
+  }
+  return new SubCategory(data)
+}
+
+const parseSubCategory = (subCategory) => {
+  let local = {
+    SUBCATEGORYNUMBER: subCategory.number,
+    SUBCATEGORYNAME: subCategory.name,
+  }
+  if(subCategory.category) {
+    local.CATEGORYNUMBER = subCategory.category.number
+  }
+  return local
+}

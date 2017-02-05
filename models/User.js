@@ -5,5 +5,6 @@ export default class User {
     this.email = data.email
     this.title = data.title
     this.role = data.role
+    this.password = data.password
   }
 }

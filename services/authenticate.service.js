@@ -5,7 +5,10 @@ import jwt from "jsonwebtoken"
 export const authenticate = async (email, password) => {
   let user = await DB.getUserByCredentials(email, password)
   console.log(user);
-  return generateToken(user)
+  if(user) {
+    return generateToken(user)
+  }
+  return null
 }
 
 export const generateToken = (user) => {

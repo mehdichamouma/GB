@@ -20,3 +20,28 @@ export const createPlace = async (place) => {
 export const updatePlace = async (place) => {
   return await DB.updatePlace(place)
 }
+
+
+export const getAllCategories = async () => {
+  return await DB.getAllCategories()
+}
+export const createCategory = async (category) => {
+  return await DB.createCategory(category)
+}
+export const updateCategory = async (category) => {
+  return await DB.updateCategory(category)
+}
+
+export const getCategory = async (category) => {
+  return await DB.getCategory(category)
+}
+
+export const createSubCategory = async (subCategory) => {
+  return await DB.createSubCategory(subCategory)
+}
+export const updateSubCategory = async (subCategory) => {
+  return await DB.updateSubCategory(subCategory)
+}
+export const getSubCategory = async (subCategory) => {
+  return await DB.getSubCategory(subCategory)
+}

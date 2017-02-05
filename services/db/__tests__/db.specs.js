@@ -26,8 +26,8 @@ describe("DB", function() {
   describe("getUserByNumber", () => {
     it("should return an user", async () => {
       let user = await getUserByNumber("1")
-      expect(user.USERNUMBER).to.eql(1)
-      expect(user.EMAIL).to.eql("abc@john.fr")
+      expect(user.number).to.eql(1)
+      expect(user.email).to.eql("abc@john.fr")
     })
   })
 

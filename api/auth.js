@@ -9,9 +9,16 @@ router.get("/token", (req, res) => {
   if(o) {
     let {name: email, pass: password} = o
     authenticate(email, password).then((token) => {
-      res.json({
-        token: token
-      })
+      if(token) {
+        res.json({
+          token: token
+        })
+      }
+      else {
+        res.status(403).json({
+          error: "authentication failed"
+        })
+      }
     })
     .catch((e) => {
       console.error(e);

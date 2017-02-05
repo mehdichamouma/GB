@@ -33,6 +33,10 @@ import EditUser from "./Views/EditUser.vue"
 import UsersLayout from "./Views/UsersLayout.vue"
 import EditPlace from "./Views/Places/EditPlace.vue"
 import Places from "./Views/Places/Places.vue"
+import Categories from "./Views/Categories/Categories.vue"
+import EditCategory from "./Views/Categories/EditCategory.vue"
+import EditSubCategory from "./Views/Categories/EditSubcategory.vue"
+import ShowCategory from "./Views/Categories/ShowCategory.vue"
 
 const router = new VueRouter({
   routes: [
@@ -58,6 +62,30 @@ const router = new VueRouter({
             {path: '', name: "places", component: Places},
             {path: 'create', name: "createPlace", component: EditPlace},
             {path: 'edit/:number', name: "editPlace", component: EditPlace}
+          ]
+        },
+        {
+          path: 'categories',
+          component: UsersLayout,
+          children: [
+            {path: '', name: "categories", component: Categories},
+            {path: 'create', name: "createCategory", component: EditCategory},
+            {path: 'edit/:number', name: "editCategory", component: EditCategory},
+            {
+              path: 'show/:number',
+              name: "showCategory",
+              component: ShowCategory,
+            },
+            {
+              path: 'show/:catNumber/subCategories/:number/edit',
+              name: "editSubCategory",
+              component: EditSubCategory
+            },
+            {
+              path: 'show/:catNumber/subCategories/:number/create',
+              name: "createSubCategory",
+              component: EditSubCategory
+            }
           ]
         }
       ]

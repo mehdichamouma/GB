@@ -133,6 +133,7 @@ create table SUBCATEGORY
 (
    SUBCATEGORYNUMBER    int not null auto_increment,
    SUBCATEGORYNAME      text,
+   CATEGORYNUMBER       int not null,
    primary key (SUBCATEGORYNUMBER)
 );
 
@@ -179,3 +180,6 @@ alter table REQUEST add constraint FK_ASK foreign key (USERNUMBER)
 
 alter table REQUEST add constraint FK_CONCERN foreign key (PRODUCTNUMBER)
       references PRODUCT (PRODUCTNUMBER) on delete restrict on update restrict;
+
+alter table SUBCATEGORY add constraint FK_BELONG2 foreign key (CATEGORYNUMBER)
+      references CATEGORY (CATEGORYNUMBER) on delete restrict on update restrict;

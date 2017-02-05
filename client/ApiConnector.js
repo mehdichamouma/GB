@@ -83,3 +83,27 @@ export const createPlace = (data) => request("/places/", {
   body: data,
   method: 'POST'
 })
+
+export const getCategories = () => request("/categories/")
+
+export const getCategory = (number) => request('/categories/' + number)
+
+export const editCategory = (number, data) => request("/categories/" + number, {
+  body: data,
+  method: 'PUT'
+})
+
+export const createCategory = (data) => request("/categories/", {
+  body: data,
+  method: 'POST'
+})
+
+export const createSubCategory = (catNumber, data) => request('/categories/' + number + '/subCategories', {
+  body: data,
+  method: 'POST'
+})
+
+export const editSubCategory = (catNumber, scNumber, data) => request('/categories/' + catNumber + '/subCategories/' + scNumber, {
+  body: data,
+  method: 'PUT'
+})

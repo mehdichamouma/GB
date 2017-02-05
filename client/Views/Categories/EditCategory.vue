@@ -3,11 +3,11 @@
     <div class="col-md-12 col-sm-12 col-xs-12">
       <div class="x_panel">
         <div class="x_title">
-          <h2 v-if="place.number">
-            Editer le lieu de stockage <small>Numéro : {{place.number}}</small>
+          <h2 v-if="category.number">
+            Editer la categorie <small>Numéro : {{category.number}}</small>
           </h2>
           <h2 v-else>
-            Ajouter un lieu de stockage
+            Ajouter une category
           </h2>
           <div class="clearfix"></div>
         </div>
@@ -19,20 +19,21 @@
               <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Nom <span class="required">*</span>
               </label>
               <div class="col-md-6 col-sm-6 col-xs-12">
-                <input v-model="place.name" type="text" id="first-name" required="required" class="form-control col-md-7 col-xs-12">
+                <input v-model="category.name" type="text" id="first-name" required="required" class="form-control col-md-7 col-xs-12">
               </div>
             </div>
             <div class="form-group">
-              <label class="control-label col-md-3 col-sm-3 col-xs-12" for="last-name">Etage <span class="required">*</span>
-              </label>
+              <label class="control-label col-md-3 col-sm-3 col-xs-12">Gestionnaire</label>
               <div class="col-md-6 col-sm-6 col-xs-12">
-                <input v-model="place.placeFloor" type="text" id="last-name" name="last-name" required="required" class="form-control col-md-7 col-xs-12">
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="middle-name" class="control-label col-md-3 col-sm-3 col-xs-12">Type</label>
-              <div class="col-md-6 col-sm-6 col-xs-12">
-                <input v-model="place.placeType" id="middle-name" class="form-control col-md-7 col-xs-12" type="text" name="middle-name">
+                <select v-on:change="onUserChange" class="form-control">
+                  <option
+                    v-for="user in users"
+                    :value="user.number"
+                    :selected="(user.number == category.managerNumber) && 'selected'"
+                  >
+                  {{user.username}}
+                  </option>
+                </select>
               </div>
             </div>
             <div class="ln_solid"></div>
@@ -51,50 +52,58 @@
 <script>
 
 import {
-  getPlace,
-  createPlace,
-  editPlace
+  editCategory,
+  createCategory,
+  getCategory,
+  getUsers
 } from "../../ApiConnector"
 
 export default {
   data() {
     return {
-      place: {
-        number: null,
+      category: {
+        managerNumber: "",
         name: "",
-        placeFloor: "",
-        placeType: "",
-      }
+        number: ""
+      },
+      users: []
     }
   },
   methods: {
     handleSubmit: async function(e) {
       e.preventDefault()
-      let {number, ...placeData} = this.place
+      let {number, ...categoryData} = this.category
       if(number) {
-        await editPlace(number, placeData)
+        await editCategory(number, categoryData)
       }
       else {
-        await createPlace(placeData)
+        await createPlace(categoryData)
       }
+    },
+    onUserChange: function(e) {
+      console.log(e);
+      this.category.managerNumber = e.target.value
     }
   },
   computed: {
     buttonLabel: function () {
-      return this.number ? "Modifier" : "Ajouter"
+      return this.category.number ? "Modifier" : "Ajouter"
     }
   },
   created: async function() {
     let {number} = this.$route.params
-    this.place.number = number
+    this.category.number = number
     if(number) {
-      let res = await getPlace(number)
-      let data = await res.json()
-      this.place = {
-        ...this.place,
+      let res = await getCategory(number)
+      let {managedBy, ...data} = await res.json()
+      this.category = {
+        ...this.category,
+        managerNumber: managedBy.number,
         ...data
       }
     }
+    let res2 = await getUsers()
+    this.users = await res2.json()
   }
 }
 </script>
