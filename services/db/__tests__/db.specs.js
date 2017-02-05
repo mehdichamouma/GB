@@ -1,12 +1,15 @@
 import {
   initDatabase,
-  getUser,
+  getUserByNumber,
   getAllUsers
 } from "../index.js"
 
 import resetDb from "../../../resetDb"
 import {expect} from "chai"
 import config from "../../../config"
+import {
+  User
+} from "../../../models/User"
 
 describe("DB", function() {
   this.timeout(0)
@@ -20,9 +23,9 @@ describe("DB", function() {
     await resetDb()
   })
 
-  describe("getUser", () => {
+  describe("getUserByNumber", () => {
     it("should return an user", async () => {
-      let user = await getUser("1")
+      let user = await getUserByNumber("1")
       expect(user.USERNUMBER).to.eql(1)
       expect(user.EMAIL).to.eql("abc@john.fr")
     })
@@ -35,6 +38,8 @@ describe("DB", function() {
       expect(users).to.have.a.lengthOf(2)
     })
   })
+
+
 
 
 })

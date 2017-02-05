@@ -1,5 +1,3 @@
-require("dotenv").config()
-
 export default {
   DB: {
     HOST: process.env.GB_DB_HOST,
