@@ -8,7 +8,8 @@ let query
 let dbName
 
 import {
-  User
+  User,
+  Place
 } from "../../models"
 
 export const clearDatabase = async () => {
@@ -129,3 +130,48 @@ export const createProduct = async (product, category, subCategory, provider, pl
   }
   return await query("INSERT INTO PRODUCT SET ?", productToSave)
 }
+
+/* PLACES */
+
+export const createPlace = async (place) => {
+  return await query("INSERT INTO PLACE SET ?", parsePlace(place))
+}
+
+export const updatePlace = async (place) => {
+  let data = parsePlace(placeData)
+  let {PLACENUMBER, ...placeData} = data
+  return await query("UPDATE PLACE SET ? WHERE PLACENUMBER = ?", [
+    placeData,
+    PLACENUMBER
+  ])
+}
+
+export const getPlace = async (place) => {
+  let results = await query("SELECT * FROM PLACE WHERE PLACENUMBER = ?", [place.number])
+  let placeFromDb = results[0]
+  if(placeFromDb) {
+    return toPlace(placeFromDb)
+  }
+  else {
+    return null
+  }
+}
+
+export const getAllPlaces = async () => {
+  let places = await query("SELECT * FROM PLACE")
+  return places.map(toPlace)
+}
+
+const toPlace = (local) => new Place({
+  number: local.PLACENUMBER,
+  name: local.PLACENAME,
+  placeFloor: local.PLACEFLOOR,
+  placeType: local.PLACETYPE,
+})
+
+const parsePlace = (place) => ({
+  PLACENUMBER: place.number,
+  PLACENAME: place.name,
+  PLACEFLOOR: place.placeFloor,
+  PLACETYPE: place.placeType,
+})

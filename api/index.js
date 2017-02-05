@@ -4,6 +4,7 @@ import bodyParser from "body-parser"
 import auth from "./auth"
 import me from "./me"
 import users from "./users"
+import places from "./places"
 
 let api = express.Router()
 
@@ -12,6 +13,7 @@ api.use(bodyParser.json());
 api.use("/auth", auth)
 api.use("/me", me)
 api.use("/users", users)
+api.use("/places", places)
 // api.get("/me", (req, res) => {
 //   if(req.user != null) {
 //     Promise.all([

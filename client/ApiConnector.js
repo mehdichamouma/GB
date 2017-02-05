@@ -69,3 +69,17 @@ export const createUser = (data) => request("/users/", {
   body: data,
   method: 'POST'
 })
+
+export const getPlaces = () => request("/places/")
+
+export const getPlace = (number) => request("/places/" + number)
+
+export const editPlace = (number, data) => request("/places/" + number, {
+  body: data,
+  method: 'PUT'
+})
+
+export const createPlace = (data) => request("/places/", {
+  body: data,
+  method: 'POST'
+})
