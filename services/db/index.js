@@ -605,11 +605,12 @@ export const createOrder = async (order) => {
   order.number = insertId
 
   if(order.orderRows) {
-    order.orderRows.forEach(row => {
-      row.order = {
+    order.orderRows = order.orderRows.map(row => ({
+      ...row,
+      order: {
         number: insertId
       }
-    })
+    }))
     await Promise.all(order.orderRows.map(addOrderRow))
   }
   return order
@@ -634,11 +635,13 @@ const parseOrder = (order) => {
 
 const parseOrderRow = (orderRow) => {
   let local = {
-    ORDERNUMBER: orderRow.number,
     DLC: orderRow.dlc,
     QUANTITY: orderRow.quantity,
     EFFQUANTITY: orderRow.effectiveQuantity,
     UNITPRICE: orderRow.unitPrice,
+  }
+  if(orderRow.order) {
+    local.ORDERNUMBER = orderRow.order.number
   }
   if(orderRow.product) {
     local.PRODUCTNUMBER = orderRow.product.number

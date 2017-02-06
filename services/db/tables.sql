@@ -67,7 +67,7 @@ create table ORDERS
    STATUS               text,
    DELIVERYDATE         date,
    EFFDELIVERYDATE      date,
-   USERNUMBER           int not null
+   USERNUMBER           int not null,
    primary key (ORDERNUMBER)
 );
 

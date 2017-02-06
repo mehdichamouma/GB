@@ -65,7 +65,7 @@
                     </li>
                     <li><a><i class="fa fa-clone"></i>Commandes <span class="fa fa-chevron-down"></span></a>
                       <ul class="nav child_menu">
-                        <li><router-link :to="{name: 'createOrders'}" >Faire une nouvelle commande</router-link></li>
+                        <li><router-link :to="{name: 'createOrder'}" >Faire une nouvelle commande</router-link></li>
                       </ul>
                     </li>
                   </ul>
