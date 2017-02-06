@@ -90,7 +90,7 @@ app.use("/api", api)
 //app.use("/api", api)
 
 //Start listening for HTTP Request
-var port = 3010 || config.PORT;
+var port = process.env.PORT || config.PORT || 3010;
 initDb().then(() => {
   server.listen(port, function () {
     console.log("Example app listening on port " + port + "!");
