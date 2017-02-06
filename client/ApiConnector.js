@@ -122,3 +122,17 @@ export const createProvider = (data) => request("/providers/", {
   body: data,
   method: 'POST'
 })
+
+export const getProducts = () => request("/products/")
+
+export const getProduct = (number) => request("/products/" + number)
+
+export const editProduct = (number, data) => request("/products/" + number, {
+  body: data,
+  method: 'PUT'
+})
+
+export const createProduct = (data) => request("/products/", {
+  body: data,
+  method: 'POST'
+})

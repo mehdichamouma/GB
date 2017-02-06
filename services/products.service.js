@@ -46,13 +46,12 @@ export const getSubCategory = async (subCategory) => {
   return await DB.getSubCategory(subCategory)
 }
 
-
 export const getProvider = async (place) => {
-  let placeFromDb = await DB.getProvider(place)
-  if(!placeFromDb) {
+  let providerFromDb = await DB.getProvider(place)
+  if(!providerFromDb) {
     return Promise.reject("User not found")
   }
-  return placeFromDb
+  return providerFromDb
 }
 
 export const getAllProviders = async () => {
@@ -66,4 +65,41 @@ export const createProvider = async (place) => {
 
 export const updateProvider = async (place) => {
   return await DB.updateProvider(place)
+}
+
+export const getProduct = async (place) => {
+  let productFromDb = await DB.getProduct(place)
+  if(!productFromDb) {
+    return Promise.reject("User not found")
+  }
+  return productFromDb
+}
+
+export const getAllProducts = async () => {
+  return await DB.getAllProducts()
+}
+
+export const createProduct = async (product) => {
+  return await DB.createProduct(product)
+}
+
+
+export const updateProduct = async (product) => {
+  return await DB.updateProduct(product)
+}
+
+export const createRequest = async (request) => {
+  return await DB.createRequest(request)
+}
+
+export const updateRequest = async (request) => {
+  return await DB.updateRequest(request)
+}
+
+export const getRequestsByStatus = async (status) => {
+  return await DB.getRequestsByStatus(status)
+}
+
+export const getAllRequests = async (status) => {
+  return await DB.getAllRequests()
 }

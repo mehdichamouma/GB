@@ -39,6 +39,9 @@ import EditSubCategory from "./Views/Categories/EditSubcategory.vue"
 import ShowCategory from "./Views/Categories/ShowCategory.vue"
 import Providers from "./Views/Providers/Providers.vue"
 import EditProvider from "./Views/Providers/EditProvider.vue"
+import Products from "./Views/Products/Products.vue"
+import EditProduct from "./Views/Products/EditProduct.vue"
+import ShowProduct from "./Views/Products/ShowProduct.vue"
 
 const router = new VueRouter({
   routes: [
@@ -97,6 +100,16 @@ const router = new VueRouter({
             {path: '', name: "providers", component: Providers},
             {path: 'create', name: "createProvider", component: EditProvider},
             {path: 'edit/:number', name: "editProvider", component: EditProvider}
+          ]
+        },
+        {
+          path: 'products',
+          component: UsersLayout,
+          children: [
+            {path: '', name: "products", component: Products},
+            {path: 'create', name: "createProduct", component: EditProduct},
+            {path: 'edit/:number', name: "editProduct", component: EditProduct},
+            {path: 'show/:number', name: "showProduct", component: ShowProduct}
           ]
         },
       ]

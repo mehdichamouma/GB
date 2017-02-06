@@ -123,6 +123,7 @@ create table REQUEST
    PRODUCTNUMBER        int not null,
    REQUESTDATE          date,
    REQUESTQUANTITY      float,
+   REQUESTSTATUS        text,
    primary key (REQUESTNUMBER)
 );
 

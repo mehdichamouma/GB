@@ -52,10 +52,10 @@
                         <li><router-link :to="{name: 'createProvider'}" >Ajouter un fournisseur</router-link></li>
                       </ul>
                     </li>
-                    <li><a><i class="fa fa-clone"></i>Layouts <span class="fa fa-chevron-down"></span></a>
+                    <li><a><i class="fa fa-clone"></i>Produits <span class="fa fa-chevron-down"></span></a>
                       <ul class="nav child_menu">
-                        <li><a href="fixed_sidebar.html">Fixed Sidebar</a></li>
-                        <li><a href="fixed_footer.html">Fixed Footer</a></li>
+                        <li><router-link :to="{name: 'products'}" >Liste des produits</router-link></li>
+                        <li><router-link :to="{name: 'createProduct'}" >Ajouter un produit</router-link></li>
                       </ul>
                     </li>
                   </ul>

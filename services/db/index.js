@@ -12,7 +12,9 @@ import {
   Provider,
   Place,
   Category,
-  SubCategory
+  SubCategory,
+  Product,
+  Request
 } from "../../models"
 
 export const clearDatabase = async () => {
@@ -118,18 +120,6 @@ const toUser = (local) => new User({
   number: local.USERNUMBER
 })
 
-/* PRODUCTS */
-
-export const createProduct = async (product, category, subCategory, provider, place) => {
-  //let category = product.category
-  let productToSave = {
-    PRODUCTNUMBER: productNumber,
-    CATEGORYNUMBER: category.number,
-    PLACENUMBER: place.number
-
-  }
-  return await query("INSERT INTO PRODUCT SET ?", productToSave)
-}
 
 /* PLACES */
 
@@ -375,3 +365,216 @@ const parseProvider = (provider) => ({
   PROVIDERFAX: provider.fax ,
   PROVIDERMAIL: provider.email ,
 })
+
+/* Products */
+
+export const createProduct = async (product) => {
+  return await query("INSERT INTO PRODUCT SET ?", parseProduct(product))
+}
+
+export const updateProduct = async (product) => {
+
+  let {PRODUCTNUMBER, ...productData} = parseProduct(product)
+  return await query("UPDATE PRODUCT SET ? WHERE PRODUCTNUMBER = ?", [
+    productData,
+    PRODUCTNUMBER
+  ])
+}
+
+export const getProduct = async (product) => {
+  let results = await query({
+    sql: `SELECT * FROM PRODUCT pr
+            LEFT JOIN CATEGORY AS ca ON pr.CATEGORYNUMBER = ca.CATEGORYNUMBER
+            LEFT JOIN SUBCATEGORY AS sc ON pr.SUBCATEGORYNUMBER = sc.SUBCATEGORYNUMBER
+            LEFT JOIN PROVIDER AS pro ON pr.PROVIDERNUMBER = pro.PROVIDERNUMBER
+            LEFT JOIN PLACE AS pl ON pr.PLACENUMBER = pl.PLACENUMBER
+            LEFT JOIN REQUEST AS re ON pr.PRODUCTNUMBER = re.PRODUCTNUMBER
+            LEFT JOIN USER AS re_us ON re.USERNUMBER = re_us.USERNUMBER
+          WHERE pr.PRODUCTNUMBER = ?`,
+    nestTables: true
+  }, [product.number])
+  console.log(results);
+  let productFromDb = toProducts(results)[0]
+  if(productFromDb) {
+    return productFromDb
+  }
+  else {
+    return null
+  }
+}
+
+export const getAllProducts = async (keyword = "") => {
+  let products = await query({
+    sql: `SELECT * FROM PRODUCT pr
+              LEFT JOIN PLACE AS pl ON pl.PLACENUMBER = pr.PLACENUMBER
+              LEFT JOIN CATEGORY AS ca ON ca.CATEGORYNUMBER = pr.CATEGORYNUMBER
+              LEFT JOIN SUBCATEGORY AS sc ON sc.SUBCATEGORYNUMBER = pr.SUBCATEGORYNUMBER
+              LEFT JOIN PROVIDER AS pro ON pro.PROVIDERNUMBER = pr.PROVIDERNUMBER
+          WHERE pr.PRODUCTNAME LIKE ?`,
+    nestTables: true
+    }, `%${keyword}%`)
+  return toProducts(products)
+}
+
+export const toProducts = (products) => products.reduce((rows, data) => {
+  let product = toProduct(data.pr)
+  let defaultPlace = toPlace(data.pl)
+  let category = toCategory(data.ca)
+  let subCategory = toSubCategory(data.sc)
+  let provider = toProvider(data.pro)
+  let request
+  if(data.re && data.re.REQUESTNUMBER !== null) {
+    request = toRequest(data.re)
+    if(data.re_us) {
+      request.requester = toUser(data.re_us)
+    }
+
+  }
+
+  let index = rows.findIndex(r => r.number == product.number)
+  if(index == -1) {
+    product.provider = provider
+    product.subCategory = subCategory
+    product.category = category
+    product.defaultPlace = defaultPlace
+    product.requests = []
+    rows.push(product)
+    index = rows.length - 1
+  }
+  if(request) {
+    rows[index].requests.push(request)
+  }
+  return rows
+}, [])
+const toProduct = (local) => {
+  let data ={
+    number: local.PRODUCTNUMBER,
+    name: local.PRODUCTNAME,
+    unit: local.PRODUCTUNIT,
+    quantity: local.STOCKQUANTITY,
+    thresholdQuantity: local.QUANTITYTHRESHOLD,
+    price: local.PRODUCTPRICE,
+  }
+  if(local.CATEGORYNUMBER) {
+     data.category = {
+       number: local.CATEGORYNUMBER
+     }
+  }
+  if(local.PROVIDERNUMBER) {
+     data.provider = {
+       number: local.PROVIDERNUMBER
+     }
+  }
+  if(local.SUBCATEGORYNUMBER) {
+     data.subCategory = {
+       number: local.SUBCATEGORYNUMBER
+     }
+  }
+  if(local.PLACENUMBER) {
+     data.defaultPlace = {
+       number: local.PLACENUMBER
+     }
+  }
+  return new Product(data)
+}
+
+const parseProduct = (product) => {
+  let local ={
+    PRODUCTNUMBER: product.number,
+    PRODUCTNAME: product.name ,
+    PRODUCTUNIT: product.unit ,
+    STOCKQUANTITY: product.quantity ,
+    QUANTITYTHRESHOLD: product.thresholdQuantity ,
+    PRODUCTPRICE: product.price ,
+  }
+  if(product.category) {
+    local.CATEGORYNUMBER = product.category.number
+  }
+  if(product.provider) {
+    local.PROVIDERNUMBER = product.provider.number
+  }
+  if(product.subCategory) {
+    local.SUBCATEGORYNUMBER = product.subCategory.number
+  }
+  if(product.defaultPlace) {
+    local.PLACENUMBER = product.defaultPlace.number
+  }
+  return local
+}
+
+
+/* REQUESTS */
+
+export const createRequest = async (request) => {
+  return await query("INSERT INTO REQUEST SET ?", parseRequest(request))
+}
+
+export const updateRequest = async (request) => {
+  let {REQUESTNUMBER, ...requestData} = parseRequest(request)
+  return await query("UPDATE REQUEST SET ? WHERE REQUESTNUMBER = ?", [
+    requestData,
+    REQUESTNUMBER
+  ])
+}
+
+export const getRequest = async (request) => {
+    let results = await query("SELECT * FROM REQUEST WHERE REQUESTNUMBER = ?", [request.number])
+    let requestFromDb = results[0]
+    if(requestFromDb) {
+      return toProvider(requestFromDb)
+    }
+    else {
+      return null
+    }
+}
+
+export const getAllRequests = async () => {
+  let results = await query(`
+    SELECT * FROM REQUEST r
+      LEFT JOIN USER AS u ON u.USERNUMBER = r.USERNUMBER
+      LEFT JOIN PRODUCT AS p ON p.PRODUCTNUMBER = r.PRODUCTNUMBER
+  `)
+  return results.map(r => {
+    let request = toRequest(r)
+    request.requester = toUser(r)
+    request.product = toProduct(r)
+    return request
+  })
+}
+
+const toRequest = (local) => {
+  let data = {
+    number: local.REQUESTNUMBER,
+    requestDate: local.REQUESTDATE,
+    quantity: local.REQUESTQUANTITY,
+    status: local.REQUESTSTATUS,
+  }
+  if(local.USERNUMBER) {
+     data.requester = {
+       number: local.USERNUMBER
+     }
+  }
+  if(local.PRODUCTNUMBER) {
+     data.product = {
+       number: local.PRODUCTNUMBER
+     }
+  }
+  return new Request(data)
+}
+
+const parseRequest = (request) => {
+  console.log(request);
+  let local = {
+    REQUESTNUMBER: request.number,
+    REQUESTDATE: request.requestDate,
+    REQUESTQUANTITY: request.quantity,
+    REQUESTSTATUS: request.status
+  }
+  if(request.requester) {
+    local.USERNUMBER = request.requester.number
+  }
+  if(request.product) {
+    local.PRODUCTNUMBER = request.product.number
+  }
+  return local
+}

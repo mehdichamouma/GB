@@ -7,6 +7,8 @@ import users from "./users"
 import places from "./places"
 import categories from "./categories"
 import providers from "./providers"
+import products from "./products"
+import requests from "./requests"
 
 let api = express.Router()
 
@@ -18,6 +20,8 @@ api.use("/users", users)
 api.use("/places", places)
 api.use("/categories", categories)
 api.use("/providers", providers)
+api.use("/products", products)
+api.use("/requests", requests)
 
 // api.get("/me", (req, res) => {
 //   if(req.user != null) {
