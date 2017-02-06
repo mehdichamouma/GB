@@ -329,10 +329,15 @@ export const updateProvider = async (provider) => {
 }
 
 export const getProvider = async (provider) => {
-  let results = await query("SELECT * FROM PROVIDER WHERE PROVIDERNUMBER = ?", [provider.number])
-  let placeFromDb = results[0]
-  if(placeFromDb) {
-    return toProvider(placeFromDb)
+  let results = await query({
+    nestTables: true,
+    sql:`SELECT * FROM PROVIDER pro
+      LEFT JOIN PRODUCT AS pr ON pro.PROVIDERNUMBER = pr.PROVIDERNUMBER
+      WHERE pro.PROVIDERNUMBER = ?`,
+    }, [provider.number])
+  let providerFromDb = toProviders(results)[0]
+  if(providerFromDb) {
+    return providerFromDb
   }
   else {
     return null
@@ -344,6 +349,20 @@ export const getAllProviders = async () => {
   return places.map(toProvider)
 }
 
+const toProviders = (providers) => providers.reduce((rows, data) => {
+  let provider = toProvider(data.pro)
+  let product = toProduct(data.pr)
+  let index = rows.findIndex(r => r.number == provider.number)
+  if(index == -1) {
+    provider.products = []
+    rows.push(provider)
+    index = rows.length - 1
+  }
+  if(product.number !== null) {
+    rows[index].products.push(product)
+  }
+  return rows
+}, [])
 const toProvider = (local) => new Provider({
   number: local.PROVIDERNUMBER,
   name: local.PROVIDERNAME,
@@ -577,4 +596,83 @@ const parseRequest = (request) => {
     local.PRODUCTNUMBER = request.product.number
   }
   return local
+}
+
+/** ORDERS **/
+
+export const createOrder = async (order) => {
+  let {insertId} = await query("INSERT INTO ORDERS SET ?", parseOrder(order))
+  order.number = insertId
+
+  if(order.orderRows) {
+    order.orderRows.forEach(row => {
+      row.order = {
+        number: insertId
+      }
+    })
+    await Promise.all(order.orderRows.map(addOrderRow))
+  }
+  return order
+}
+
+export const addOrderRow = async (orderRow) => {
+  return await query("INSERT INTO CONTAIN SET ?", parseOrderRow(orderRow))
+}
+
+const parseOrder = (order) => {
+  let local = {
+    ORDERNUMBER: order.number,
+    STATUS: order.status,
+    DELIVERYDATE: order.deliveryDate,
+    EFFDELIVERYDATE: order.effDeliveryDate,
+  }
+  if(order.orderCreator) {
+    local.USERNUMBER = order.orderCreator.number
+  }
+  return local
+}
+
+const parseOrderRow = (orderRow) => {
+  let local = {
+    ORDERNUMBER: orderRow.number,
+    DLC: orderRow.dlc,
+    QUANTITY: orderRow.quantity,
+    EFFQUANTITY: orderRow.effectiveQuantity,
+    UNITPRICE: orderRow.unitPrice,
+  }
+  if(orderRow.product) {
+    local.PRODUCTNUMBER = orderRow.product.number
+  }
+  return local
+}
+
+const toOrder = (local) => {
+  let data = {
+    number: local.ORDERNUMBER,
+    status: local.STATUS,
+    deliveryDate: local.DELIVERYDATE,
+    effDeliveryDate: local.EFFDELIVERYDATE,
+  }
+  if(local.PRODUCTNUMBER) {
+    data.product = {
+      number: local.PRODUCTNUMBER
+    }
+  }
+  return new Order(data)
+}
+
+const toOrderRow = (local) => {
+  let data = {
+    number: local.ORDERNUMBER,
+    dlc: local.DLC,
+    quantity: local.QUANTITY,
+    effectiveQuantity: local.EFFQUANTITY,
+    unitPrice: local.UNITPRICE,
+  }
+  if(local.ORDERNUMBER) {
+    data.order = {
+      number: local.ORDERNUMBER
+    }
+  }
+  return new OrderRow(data)
 }

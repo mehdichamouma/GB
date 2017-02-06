@@ -136,3 +136,13 @@ export const createProduct = (data) => request("/products/", {
   body: data,
   method: 'POST'
 })
+
+export const updateRequest = (number, data) => request("/requests/" + number, {
+  body: data, method: 'PUT'
+})
+
+export const createRequest = (pNumber, data) => request("/products/" + pNumber + "/requests", {
+  body: data, method: 'POST'
+})
+
+export const getRequests = () => request("/requests/")

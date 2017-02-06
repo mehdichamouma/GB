@@ -114,23 +114,5 @@ router.post("/:number/requests", async (req, res) => {
   }
 })
 
-router.put("/:number/requests", async (req, res) => {
-  try {
-    let request = new Request({
-      product: {
-        number: req.params.number
-      },
-      requester: {
-        number: req.user.number
-      },
-      ...req.body
-    })
-    await updateRequest(request)
-    res.json(request)
-  }
-  catch (e) {
-    console.error(e);
-    res.status(500).json(e)
-  }
-})
+
 export default router

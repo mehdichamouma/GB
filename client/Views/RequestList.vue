@@ -3,10 +3,10 @@
     <thead>
     <tr class="headings">
     <th class="column-title">Demandeur </th>
+    <th class="column-title">Produit </th>
     <th class="column-title">Date de la demande </th>
     <th class="column-title">Quantité souhaité</th>
     <th class="column-title">Status </th>
-    <th class="column-title">Action </th>
     </tr>
     </thead>
 
@@ -14,22 +14,18 @@
 
     <tr v-for="row in requests" class="even pointer">
       <td class=" ">{{row.requester.username}}</td>
+      <td class=" ">{{row.product.name}}</td>
       <td class=" ">{{row.requestDate}}</td>
       <td class=" ">{{row.quantity}} </td>
-      <td >
-        <span v-bind:class="['label', row.status.labelClass]">
-          {{row.status.name}}
-        </span>
-      </td>
       <td class=" ">
-        <div v-if="row.actions.length" class="btn-group">
-          <button type="button" class="btn btn-danger">Action</button>
-          <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-            <span class="caret"></span>
+        <div  class="btn-group">
+
+          <button  type="button" v-bind:class="['btn', row.actions.length && 'dropdown-toggle', row.status.labelClass]" data-toggle="dropdown" aria-expanded="false">
+            {{row.status.name}} <span v-if="row.actions.length" class="caret"></span>
             <span class="sr-only">Toggle Dropdown</span>
           </button>
-          <ul class="dropdown-menu" role="menu">
-            <li v-for="action in row.actions" v-on:click="handleAction(action)"><a href="#">{{action}}</a></li>
+          <ul v-if="row.actions.length" class="dropdown-menu" role="menu">
+            <li v-for="action in row.actions" ><a v-on:click="handleAction(row, action.value)">{{action.display}}</a></li>
           </ul>
         </div>
 
@@ -41,30 +37,39 @@
 </template>
 
 <script>
+
+import {updateRequest} from "../ApiConnector"
+
 let statusMapper = {
   "REQUEST_REFUSED": {
     name: "Refusée",
-    labelClass: "label-danger",
+    labelClass: "btn-danger",
+    action: "Refuser la requête"
   },
   "REQUEST_COMPLETED": {
     name: "Terminée",
-    labelClass: "label-primary",
+    labelClass: "btn-primary",
+    action: "Terminer la requête"
   },
   "REQUEST_CANCELED": {
     name: "Annulée",
-    labelClass: "label-danger",
+    labelClass: "btn-danger",
+    action: "Annuler la requête"
   },
   "REQUEST_PENDING": {
     name: "En attente",
-    labelClass: "label-warning",
+    labelClass: "btn-warning",
+    action: "Mettre la requête en attente"
   },
   "REQUEST_ACCEPTED": {
     name: "Acceptée",
-    labelClass: "label-success",
+    labelClass: "btn-success",
+    action: "Accepter la requête"
   },
   "REQUEST_PROCESSED": {
     name: "En cours de traitement",
-    labelClass: "label-info",
+    labelClass: "btn-info",
+    action: "Traiter la requête"
   },
 }
 
@@ -72,8 +77,13 @@ let statusMapper = {
 export default {
   props: ["rows", "actionEnabled"],
   methods: {
-    handleAction(action) {
+    handleAction: async function(row, action) {
       console.log(action);
+      await updateRequest(row.number, {
+        quantity: row.quantity,
+        status: action
+      })
+      this.$emit('change')
     }
   },
   computed: {
@@ -93,7 +103,8 @@ export default {
               editEnabled = false
               break;
             case "REQUEST_PENDING":
-              actions = ['REQUEST_ACCEPTED', 'REQUEST_REFUSED']
+              actions.push('REQUEST_ACCEPTED')
+              !isOwner && actions.push('REQUEST_REFUSED')
               editEnabled = true
               break;
             case "REQUEST_ACCEPTED":
@@ -105,19 +116,19 @@ export default {
           switch (row.status) {
             case "REQUEST_ACCEPTED":
               actions.push("REQUEST_PROCESSED")
-              actions.push("REQUEST_REFUSED")
+              !isOwner && actions.push("REQUEST_REFUSED")
               editEnabled = true
               break;
             case "REQUEST_PROCESSED":
               actions.push("REQUEST_CANCELED")
               editEnabled = true
+              break;
             default:
           }
         }
         if(isOwner) {
           switch (row.status) {
             case "REQUEST_PENDING":
-              actions.push("REQUEST_PROCESSED")
               actions.push("REQUEST_CANCELED")
               editEnabled = true
               break;
@@ -128,7 +139,10 @@ export default {
         }
         return {
           ...row,
-          actions,
+          actions: actions.map(value => ({
+            value,
+            display: statusMapper[value] && statusMapper[value].action
+          })),
           status: statusMapper[row.status] || {},
         }
       })

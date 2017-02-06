@@ -80,12 +80,12 @@
                               <p>{{product.subCategory.name}}</p>
                               <p class="title">Fournisseur</p>
                               <p>{{product.provider.name}}</p>
-                              <p class="title">Prix</p>
+                              <p class="title">Prix unitaire</p>
                               <p>{{product.price}}€</p>
                               <p class="title">Quantité en stock</p>
                               <p>{{product.quantity}} {{product.unit}}</p>
                               <p class="title">Quantité d'alerte</p>
-                              <p>{{product.quantityThreshold}} {{product.unit}}</p>
+                              <p>{{product.thresholdQuantity}} {{product.unit}}</p>
                             </div>
 
                             <br>
@@ -131,6 +131,7 @@
                           <request-list
                             :rows="product.requests"
                             :actionEnabled="isProductOwner"
+                            v-on:change="refresh"
                           >
                           </request-list>
                         </div>
@@ -143,11 +144,11 @@
 
                               <div class="form-group has-feedback">
                                 <label for="ex3">Quantité souhaité</label>
-                                      <input v-model="product.quantity" required="required" type="text" class="form-control" id="inputSuccess3" placeholder="Quantité">
+                                      <input v-model="newRequest.quantity" required="required" type="text" class="form-control" id="inputSuccess3" placeholder="Quantité souhaitée">
                                       <span class="form-control-feedback right" >{{product.unit}}</span>
                               </div>
                             </div>
-                            <button type="submit" class="btn btn-default">Effectuer la demande d'achat</button>
+                            <button type="submit" class="btn btn-default" v-on:click="handleNewRequest">Effectuer la demande d'achat</button>
                           </form>
                         <div class="col-md-12">
                       </div>
@@ -159,7 +160,8 @@
 
 <script>
 import {
-  getProduct
+  getProduct,
+  createRequest
 } from "../../ApiConnector"
 import RequestList from "../RequestList.vue"
 
@@ -180,6 +182,26 @@ export default {
         subCategory: {},
         defaultPlace: {},
         requests: []
+      },
+      newRequest: {
+        quantity: null
+      }
+    }
+  },
+  methods: {
+    handleNewRequest: async function(e) {
+      e.preventDefault()
+      await createRequest(this.product.number, {
+        quantity: this.newRequest.quantity
+      })
+      await this.refresh()
+    },
+    refresh: async function() {
+      let {number} = this.$route.params
+      if(number) {
+        this.product.number = number
+        let res = await getProduct(number)
+        this.product = await res.json()
       }
     }
   },
@@ -189,12 +211,7 @@ export default {
     }
   },
   created: async function () {
-    let {number} = this.$route.params
-    if(number) {
-      this.product.number = number
-      let res = await getProduct(number)
-      this.product = await res.json()
-    }
+    await this.refresh()
   }
 }
 </script>

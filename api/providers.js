@@ -41,6 +41,7 @@ router.get("/:number", async (req, res) => {
       number: req.params.number
     }))
     if(provider) {
+      console.log(provider);
       res.json(provider)
     }
     else {

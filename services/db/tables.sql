@@ -41,7 +41,10 @@ create table CONTAIN
 (
    ORDERNUMBER          int not null,
    PRODUCTNUMBER        int not null,
-   DLC                  float,
+   DLC                  date,
+   QUANTITY             int,
+   EFFQUANTITY          int,
+   UNITPRICE            float,
    primary key (ORDERNUMBER, PRODUCTNUMBER)
 );
 
@@ -62,8 +65,9 @@ create table ORDERS
 (
    ORDERNUMBER          int not null auto_increment,
    STATUS               text,
-   QUANTITYNUMBER       int,
    DELIVERYDATE         date,
+   EFFDELIVERYDATE      date,
+   USERNUMBER           int not null
    primary key (ORDERNUMBER)
 );
 
@@ -184,3 +188,6 @@ alter table REQUEST add constraint FK_CONCERN foreign key (PRODUCTNUMBER)
 
 alter table SUBCATEGORY add constraint FK_BELONG2 foreign key (CATEGORYNUMBER)
       references CATEGORY (CATEGORYNUMBER) on delete restrict on update restrict;
+
+alter table ORDERS add constraint FK_BELONG3 foreign key (USERNUMBER)
+      references USER (USERNUMBER) on delete restrict on update restrict;

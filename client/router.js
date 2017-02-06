@@ -42,6 +42,7 @@ import EditProvider from "./Views/Providers/EditProvider.vue"
 import Products from "./Views/Products/Products.vue"
 import EditProduct from "./Views/Products/EditProduct.vue"
 import ShowProduct from "./Views/Products/ShowProduct.vue"
+import Requests from "./Views/Requests/Requests.vue"
 
 const router = new VueRouter({
   routes: [
@@ -110,6 +111,13 @@ const router = new VueRouter({
             {path: 'create', name: "createProduct", component: EditProduct},
             {path: 'edit/:number', name: "editProduct", component: EditProduct},
             {path: 'show/:number', name: "showProduct", component: ShowProduct}
+          ]
+        },
+        {
+          path: 'requests',
+          component: UsersLayout,
+          children: [
+            {path: '', name: "requests", component: Requests},
           ]
         },
       ]

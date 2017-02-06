@@ -6,7 +6,8 @@ import {
   createProvider,
   createPlace,
   createProduct,
-  createRequest
+  createRequest,
+  createOrder
 } from "./services/db"
 
 import {
@@ -16,7 +17,9 @@ import {
   Place,
   Provider,
   Product,
-  Request
+  Request,
+  Order,
+  OrderRow
 } from "./models"
 
 let users = [
@@ -372,6 +375,32 @@ let requests = [
   }),
 
 ]
+
+let orders = [
+  new Order({
+    orderCreator: users[0],
+    orderDate: new Date(2017, 5, 6),
+    status: "xxx",
+    deliveryDate: new Date(2017, 5, 5),
+    orderRows: [
+      new OrderRow({
+        product: products[1],
+        quantity: 30,
+        //effectiveQuantity: ""
+        //order: ""
+        unitPrice: 12,
+      }),
+      new OrderRow({
+        product: products[2],
+        quantity: 50,
+        //effectiveQuantity: ""
+        //order: ""
+        unitPrice: 15,
+
+      }),
+    ]
+  })
+]
 export default async (verbose = false) => {
   verbose && console.log("reset DB");
   await clearDatabase()
@@ -382,7 +411,7 @@ export default async (verbose = false) => {
   await Promise.all(places.map(createPlace))
   await Promise.all(products.map(createProduct))
   await Promise.all(requests.map(createRequest))
-
+  await Promise.all(orders.map(createOrder))
   verbose && console.log("DB has been reset");
 
 

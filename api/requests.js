@@ -3,11 +3,13 @@ let router = express.Router()
 
 import {
   getRequestsByStatus,
-  getAllRequests
+  getAllRequests,
+  updateRequest
 } from "../services/products.service.js"
 
 import {
-  Product
+  Product,
+  Request
 } from "../models"
 
 router.get("/", async (req, res) => {
@@ -27,5 +29,18 @@ router.get("/", async (req, res) => {
   }
 })
 
-
+router.put("/:number", async (req, res) => {
+  try {
+    let request = new Request({
+      number: req.params.number,
+      ...req.body
+    })
+    await updateRequest(request)
+    res.json(request)
+  }
+  catch (e) {
+    console.error(e);
+    res.status(500).json(e)
+  }
+})
 export default router
