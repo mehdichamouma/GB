@@ -44,8 +44,8 @@ let users = [
  new User({
    number: "4",
    username: "def",
-   email: "def@john.fr",
-   password: "azerty123"
+   email: "demo@pife.fr",
+   password: "pife_polytech_2017"
  })
 ]
 

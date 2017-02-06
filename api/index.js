@@ -23,6 +23,9 @@ api.use("/providers", providers)
 api.use("/products", products)
 api.use("/requests", requests)
 
+import resetDb from "../resetDb"
+import basic from "basic-auth"
+
 // api.get("/me", (req, res) => {
 //   if(req.user != null) {
 //     Promise.all([
@@ -47,17 +50,17 @@ api.use("/requests", requests)
 //   }
 // })
 
-// api.get("/resetDB", (req, res) => {
-//     let o = basic(req)
-//     if(o) {
-//       let {name, pass} = o
-//       if(name == "admin" && pass == "azerty123") {
-//         return populateDb(config.DB_URL).then(() => {
-//           res.send("Database reinitialized")
-//         })
-//       }
-//     }
-//     return res.status(401).send("Authrorization needed")
-// })
+api.get("/resetDB", (req, res) => {
+    let o = basic(req)
+    if(o) {
+      let {name, pass} = o
+      if(name == "admin" && pass == "azerty123") {
+        return resetDb().then(() => {
+          res.send("Database reinitialized")
+        })
+      }
+    }
+    return res.status(401).send("Authrorization needed")
+})
 
 export default api
