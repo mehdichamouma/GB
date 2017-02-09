@@ -146,3 +146,15 @@ export const createRequest = (pNumber, data) => request("/products/" + pNumber +
 })
 
 export const getRequests = () => request("/requests/")
+
+export const getOrders = () => request("/orders/")
+
+export const createOrder = (data) => request("/orders/", {
+  body: data, method: 'POST'
+})
+
+export const getOrder = (number) => request("/orders/" + number)
+
+export const updateOrder = (number, data) => request("/orders/" + number, {
+  body: data, method: 'PUT'
+})

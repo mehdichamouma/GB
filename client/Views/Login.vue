@@ -2,7 +2,7 @@
     <div class="animate form login_form">
       <section class="login_content">
         <form>
-          <h1>Login</h1>
+          <h1>Connexion</h1>
           <div>
             <input type="text" class="form-control" placeholder="Username" required="" v-model="email"/>
           </div>
@@ -21,7 +21,7 @@
             <br />
 
             <div>
-              <h1><i class="fa fa-paw"></i> </h1>
+              <h1><img src="/logo.png" height="50" /></h1>
               <p>©2016 Tous droits réservés</p>
             </div>
           </div>

@@ -2,7 +2,7 @@ import mysql from "mysql"
 import promisify from "es6-promisify"
 import fs from "fs-promise"
 import path from "path"
-
+import {pickBy} from "lodash"
 let connection
 let query
 let dbName
@@ -14,7 +14,9 @@ import {
   Category,
   SubCategory,
   Product,
-  Request
+  Request,
+  Order,
+  OrderRow
 } from "../../models"
 
 export const clearDatabase = async () => {
@@ -49,6 +51,7 @@ export const initDatabase = (dbInfos, _dbName) => {
 /* USERS */
 
 export const createUser = async (user) => {
+  console.log(user.number);
   return await query("INSERT INTO USER SET ?", {
     USERNAME: user.username,
     EMAIL: user.email,
@@ -170,13 +173,16 @@ const parsePlace = (place) => ({
 /* Categories */
 
 export const getAllCategories = async () => {
-  let categories = await query(`
-    SELECT c.*, u.*, sc.*
+  let categories = await query({
+    nestTables: true,
+    sql: `
+    SELECT *
     FROM CATEGORY c
       LEFT JOIN MANAGE AS m ON m.CATEGORYNUMBER = c.CATEGORYNUMBER
       LEFT JOIN USER AS u ON u.USERNUMBER = m.USERNUMBER
       LEFT JOIN SUBCATEGORY AS sc ON c.CATEGORYNUMBER = sc.CATEGORYNUMBER
-  `)
+  `})
+  console.log(categories);
   return toCategories(categories)
 }
 
@@ -212,14 +218,16 @@ export const updateCategory = async (category) => {
 }
 
 export const getCategory = async (category) => {
-  let results = await query(`
-    SELECT c.*, u.*, sc.*
+  let results = await query({
+    nestTables: true,
+    sql:`
+    SELECT *
     FROM CATEGORY c
       LEFT JOIN MANAGE AS m ON m.CATEGORYNUMBER = c.CATEGORYNUMBER
       LEFT JOIN USER AS u ON u.USERNUMBER = m.USERNUMBER
       LEFT JOIN SUBCATEGORY AS sc ON c.CATEGORYNUMBER = sc.CATEGORYNUMBER
     WHERE c.CATEGORYNUMBER = ?
-  `, [category.number])
+  `}, [category.number])
   return toCategories(results)[0]
 }
 
@@ -233,9 +241,10 @@ const toCategory = (local) => {
 
 const toCategories = (local) => {
   return local.reduce((rows, data) => {
-    let category = toCategory(data)
-    let managedBy = toUser(data)
-    let subCategory = toSubCategory(data)
+    let {c, m, u, sc} = data
+    let category = toCategory(c)
+    let managedBy = toUser(u)
+    let subCategory = toSubCategory(sc)
     let index = rows.findIndex(r => r.number == category.number)
     if(index == -1) {
       category.managedBy = managedBy
@@ -403,6 +412,9 @@ export const updateProduct = async (product) => {
 export const getProduct = async (product) => {
   let results = await query({
     sql: `SELECT * FROM PRODUCT pr
+            LEFT JOIN CONTAIN AS row ON row.PRODUCTNUMBER = pr.PRODUCTNUMBER
+            LEFT JOIN ORDERS AS ord ON ord.ORDERNUMBER = row.ORDERNUMBER
+            LEFT JOIN PLACE AS row_pla ON row.PLACENUMBER = row_pla.PLACENUMBER
             LEFT JOIN CATEGORY AS ca ON pr.CATEGORYNUMBER = ca.CATEGORYNUMBER
             LEFT JOIN SUBCATEGORY AS sc ON pr.SUBCATEGORYNUMBER = sc.SUBCATEGORYNUMBER
             LEFT JOIN PROVIDER AS pro ON pr.PROVIDERNUMBER = pro.PROVIDERNUMBER
@@ -441,6 +453,17 @@ export const toProducts = (products) => products.reduce((rows, data) => {
   let category = toCategory(data.ca)
   let subCategory = toSubCategory(data.sc)
   let provider = toProvider(data.pro)
+  let row
+  if(data.row && data.row.PRODUCTNUMBER != null && data.row.ORDERNUMBER != null) {
+    row = toOrderRow(data.row)
+    if(data.ord && data.ord.ORDERNUMBER != null) {
+      row.order = toOrder(data.ord)
+    }
+    if(data.row_pla && data.row_pla.PLACENUMBER != null) {
+      row.place = toPlace(data.row_pla)
+    }
+  }
+
   let request
   if(data.re && data.re.REQUESTNUMBER !== null) {
     request = toRequest(data.re)
@@ -457,11 +480,15 @@ export const toProducts = (products) => products.reduce((rows, data) => {
     product.category = category
     product.defaultPlace = defaultPlace
     product.requests = []
+    product.stockEntries = []
     rows.push(product)
     index = rows.length - 1
   }
-  if(request) {
+  if(request && !rows[index].requests.find(r => r.number == request.number)) {
     rows[index].requests.push(request)
+  }
+  if(row && !rows[index].stockEntries.find(e => e.order.number == row.order.number)) {
+    rows[index].stockEntries.push(row)
   }
   return rows
 }, [])
@@ -473,6 +500,7 @@ const toProduct = (local) => {
     quantity: local.STOCKQUANTITY,
     thresholdQuantity: local.QUANTITYTHRESHOLD,
     price: local.PRODUCTPRICE,
+    tva: local.PRODUCTTVA
   }
   if(local.CATEGORYNUMBER) {
      data.category = {
@@ -505,6 +533,7 @@ const parseProduct = (product) => {
     STOCKQUANTITY: product.quantity ,
     QUANTITYTHRESHOLD: product.thresholdQuantity ,
     PRODUCTPRICE: product.price ,
+    PRODUCTTVA: product.tva
   }
   if(product.category) {
     local.CATEGORYNUMBER = product.category.number
@@ -600,6 +629,61 @@ const parseRequest = (request) => {
 
 /** ORDERS **/
 
+export const getOrder = async (order) => {
+  let orders = await query({
+    nestTables: true,
+    sql: `
+        SELECT *  FROM ORDERS ord
+          LEFT JOIN USER AS us ON us.USERNUMBER = ord.USERNUMBER
+          LEFT JOIN CONTAIN AS row ON row.ORDERNUMBER = ord.ORDERNUMBER
+          LEFT JOIN PRODUCT AS pro ON pro.PRODUCTNUMBER = row.PRODUCTNUMBER
+          LEFT JOIN PLACE AS pla ON row.PLACENUMBER = pla.PLACENUMBER
+        WHERE ord.ORDERNUMBER = ?
+    `
+  }, [order.number])
+  return toOrders(orders)[0]
+}
+
+export const getAllOrders = async () => {
+  let orders = await query({
+    nestTables: true,
+    sql: `
+        SELECT *  FROM ORDERS ord
+          LEFT JOIN USER AS us ON us.USERNUMBER = ord.USERNUMBER
+          LEFT JOIN CONTAIN AS row ON row.ORDERNUMBER = ord.ORDERNUMBER
+          LEFT JOIN PRODUCT AS pro ON pro.PRODUCTNUMBER = row.PRODUCTNUMBER
+          LEFT JOIN PLACE AS pla ON row.PLACENUMBER = pla.PLACENUMBER
+    `
+  })
+  console.log(orders);
+  return toOrders(orders)
+}
+
+const toOrders = orders => orders.reduce((rows, data) => {
+  let {ord, us, row, pro, pla} = data
+  let order = toOrder(ord)
+  let orderRow = toOrderRow(row)
+  let product = toProduct(pro)
+  let place = toPlace(pla)
+  if(us) {
+    order.orderCreator = toUser(us)
+  }
+
+  let index = rows.findIndex(r => r.number == order.number)
+  if(index == -1) {
+    order.orderRows = []
+    rows.push(order)
+    index = rows.length - 1
+  }
+  if(product.number) {
+    orderRow.product = product
+    orderRow.place = place
+    rows[index].orderRows.push(orderRow)
+
+  }
+  return rows
+}, [])
+
 export const createOrder = async (order) => {
   let {insertId} = await query("INSERT INTO ORDERS SET ?", parseOrder(order))
   order.number = insertId
@@ -616,6 +700,17 @@ export const createOrder = async (order) => {
   return order
 }
 
+export const updateOrder = async (order) => {
+  let {ORDERNUMBER, ...orderData} = parseOrder(order)
+  await query("UPDATE ORDERS SET ? WHERE ORDERNUMBER = ?", [orderData, ORDERNUMBER])
+  if(order.orderRows) {
+    await Promise.all(order.orderRows.map(async (row) => {
+      let {PRODUCTNUMBER, ...rowData} = parseOrderRow(row)
+      return await query("UPDATE CONTAIN SET ? WHERE ORDERNUMBER = ? AND PRODUCTNUMBER = ?", [rowData, ORDERNUMBER, PRODUCTNUMBER])
+    }))
+  }
+}
+
 export const addOrderRow = async (orderRow) => {
   return await query("INSERT INTO CONTAIN SET ?", parseOrderRow(orderRow))
 }
@@ -626,11 +721,14 @@ const parseOrder = (order) => {
     STATUS: order.status,
     DELIVERYDATE: order.deliveryDate,
     EFFDELIVERYDATE: order.effDeliveryDate,
+    ORDERDATE: order.orderDate,
+    ORDERCOMMENT: order.comment,
+    ORDEREXTNUMBER: order.extNumber
   }
   if(order.orderCreator) {
     local.USERNUMBER = order.orderCreator.number
   }
-  return local
+  return pickBy(local)
 }
 
 const parseOrderRow = (orderRow) => {
@@ -639,6 +737,7 @@ const parseOrderRow = (orderRow) => {
     QUANTITY: orderRow.quantity,
     EFFQUANTITY: orderRow.effectiveQuantity,
     UNITPRICE: orderRow.unitPrice,
+    EFFTVA: orderRow.effectiveTVA
   }
   if(orderRow.order) {
     local.ORDERNUMBER = orderRow.order.number
@@ -646,7 +745,10 @@ const parseOrderRow = (orderRow) => {
   if(orderRow.product) {
     local.PRODUCTNUMBER = orderRow.product.number
   }
-  return local
+  if(orderRow.place) {
+    local.PLACENUMBER = orderRow.place.number
+  }
+  return pickBy(local)
 }
 
 const toOrder = (local) => {
@@ -655,10 +757,13 @@ const toOrder = (local) => {
     status: local.STATUS,
     deliveryDate: local.DELIVERYDATE,
     effDeliveryDate: local.EFFDELIVERYDATE,
+    orderDate: local.ORDERDATE,
+    extNumber: local.ORDEREXTNUMBER,
+    comment: local.ORDERCOMMENT
   }
-  if(local.PRODUCTNUMBER) {
-    data.product = {
-      number: local.PRODUCTNUMBER
+  if(local.USERNUMBER) {
+    data.orderCreator = {
+      number: local.USERNUMBER
     }
   }
   return new Order(data)
@@ -666,15 +771,25 @@ const toOrder = (local) => {
 
 const toOrderRow = (local) => {
   let data = {
-    number: local.ORDERNUMBER,
     dlc: local.DLC,
     quantity: local.QUANTITY,
     effectiveQuantity: local.EFFQUANTITY,
+    effectiveTVA: local.EFFTVA,
     unitPrice: local.UNITPRICE,
   }
   if(local.ORDERNUMBER) {
     data.order = {
       number: local.ORDERNUMBER
+    }
+  }
+  if(local.PRODUCTNUMBER) {
+    data.product = {
+      number: local.PRODUCTNUMBER
+    }
+  }
+  if(local.PLACENUMBER) {
+    data.place = {
+      number: local.PLACENUMBER
     }
   }
   return new OrderRow(data)

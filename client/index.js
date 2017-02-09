@@ -25,7 +25,8 @@ new Vue({
   router: router,
   data() {
     return {
-      store: store
+      store: store,
+      router: router
     }
   },
   render: h => h(App),

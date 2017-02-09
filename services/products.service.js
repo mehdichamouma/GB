@@ -88,6 +88,16 @@ export const updateProduct = async (product) => {
   return await DB.updateProduct(product)
 }
 
+export const updateProductQuantity = async (product, diff) => {
+  let productFromDb = await getProduct(product)
+  if(productFromDb) {
+    productFromDb.quantity = parseFloat(productFromDb.quantity) + parseFloat(diff)
+    console.log(productFromDb);
+    await updateProduct(productFromDb)
+  }
+  return productFromDb
+}
+
 export const createRequest = async (request) => {
   return await DB.createRequest(request)
 }

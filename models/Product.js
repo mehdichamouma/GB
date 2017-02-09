@@ -14,5 +14,6 @@ export default class Product {
     this.provider = data.provider
     this.unit = data.unit
     this.price = data.price
+    this.tva = data.tva
   }
 }

@@ -44,7 +44,9 @@ create table CONTAIN
    DLC                  date,
    QUANTITY             int,
    EFFQUANTITY          int,
+   EFFTVA               float,
    UNITPRICE            float,
+   PLACENUMBER          int,
    primary key (ORDERNUMBER, PRODUCTNUMBER)
 );
 
@@ -67,7 +69,10 @@ create table ORDERS
    STATUS               text,
    DELIVERYDATE         date,
    EFFDELIVERYDATE      date,
+   ORDERDATE            date,
    USERNUMBER           int not null,
+   ORDERCOMMENT         text,
+   ORDEREXTNUMBER       text,
    primary key (ORDERNUMBER)
 );
 
@@ -98,6 +103,7 @@ create table PRODUCT
    STOCKQUANTITY        int,
    QUANTITYTHRESHOLD    int,
    PRODUCTPRICE         float,
+   PRODUCTTVA           float,
    primary key (PRODUCTNUMBER)
 );
 
@@ -161,6 +167,9 @@ alter table CONTAIN add constraint FK_CONTAIN foreign key (ORDERNUMBER)
 
 alter table CONTAIN add constraint FK_CONTAIN2 foreign key (PRODUCTNUMBER)
       references PRODUCT (PRODUCTNUMBER) on delete restrict on update restrict;
+
+alter table CONTAIN add constraint FK_BELONG4 foreign key (PLACENUMBER)
+      references PLACE (PLACENUMBER) on delete restrict on update restrict;
 
 alter table MANAGE add constraint FK_MANAGE foreign key (USERNUMBER)
       references USER (USERNUMBER) on delete restrict on update restrict;

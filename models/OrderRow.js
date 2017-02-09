@@ -1,11 +1,14 @@
 export default class OrderRow {
   constructor(data) {
-    this.number = data.number
     this.product = data.product
-    this.quantity = data.quantity
-    this.effectiveQuantity = data.effectiveQuantity
+    this.quantity = parseFloat(data.quantity)
+    if(data.dlc) {
+      this.dlc = new Date(data.dlc)
+    }
+    this.effectiveQuantity = parseFloat(data.effectiveQuantity)
     this.order = data.order
     this.unitPrice = data.unitPrice
-    this.dlc = data.dlc
+    this.effectiveTVA = data.effectiveTVA
+    this.place = data.place
   }
 }

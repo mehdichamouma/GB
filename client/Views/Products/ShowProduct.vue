@@ -34,6 +34,7 @@
                           <thead>
                           <tr class="headings">
                           <th class="column-title">#Commande </th>
+                          <th class="column-title">Status</th>
                           <th class="column-title">Date de livraison</th>
                           <th class="column-title">Quantité </th>
                           <th class="column-title">Date limite de conservation </th>
@@ -43,12 +44,13 @@
 
                           <tbody>
 
-                          <tr v-for="row in product.history" class="even pointer">
-                            <td class=" ">{{row.command.number}}</td>
-                            <td class=" ">{{row.shippedDate}} </td>
+                          <tr v-for="row in product.stockEntries" class="even pointer">
+                            <td class=" ">{{row.order.number}}</td>
+                            <td class=" "><orderstatus :status="row.order.status"></orderstatus></td>
+                            <td class=" ">{{row.order.deliveryDate}} </td>
                             <td class=" ">{{row.quantity}} </td>
-                            <td class=" ">{{row.dlc}}</td>
-                            <td class=" ">{{row.place.name}} </td>
+                            <td class=" ">{{row.dlc || "N/A"}}</td>
+                            <td class=" ">{{(row.place && row.place.name) || "N/A"}} </td>
                           </tr>
 
                           </tbody>
@@ -164,10 +166,12 @@ import {
   createRequest
 } from "../../ApiConnector"
 import RequestList from "../RequestList.vue"
+import Orderstatus from "../Orders/OrderStatusBadge.vue"
 
 export default {
   components: {
-    "request-list": RequestList
+    "request-list": RequestList,
+    Orderstatus
   },
   data() {
     return {

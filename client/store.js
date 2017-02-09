@@ -21,6 +21,7 @@ export default {
     else {
       let token = localStorage.userToken
       if(token) {
+        console.log(token);
         this.setUserToken(token)
         return token
       }

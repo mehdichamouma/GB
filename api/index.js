@@ -9,6 +9,8 @@ import categories from "./categories"
 import providers from "./providers"
 import products from "./products"
 import requests from "./requests"
+import orders from "./orders"
+
 
 let api = express.Router()
 
@@ -22,6 +24,7 @@ api.use("/categories", categories)
 api.use("/providers", providers)
 api.use("/products", products)
 api.use("/requests", requests)
+api.use("/orders", orders)
 
 import resetDb from "../resetDb"
 import basic from "basic-auth"

@@ -157,13 +157,13 @@ export default {
     handleSubmit: async function(e) {
       e.preventDefault()
       console.log(this.product);
-      // let {number, ...categoryData} = this.product
-      // if(number) {
-      //   await editProduct(number, categoryData)
-      // }
-      // else {
-      //   await createProduct(categoryData)
-      // }
+      let {number, ...categoryData} = this.product
+      if(number) {
+        await editProduct(number, categoryData)
+      }
+      else {
+        await createProduct(categoryData)
+      }
     },
     onPlaceChange: function(e) {
       this.product.defaultPlaceNumber = e.target.value

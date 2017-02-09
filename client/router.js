@@ -43,7 +43,9 @@ import Products from "./Views/Products/Products.vue"
 import EditProduct from "./Views/Products/EditProduct.vue"
 import ShowProduct from "./Views/Products/ShowProduct.vue"
 import Requests from "./Views/Requests/Requests.vue"
-import EditOrder from "./Views/Orders/EditOrder.vue"
+import CreateOrder from "./Views/Orders/CreateOrder.vue"
+import Orders from "./Views/Orders/Orders.vue"
+import ShowOrder from "./Views/Orders/ShowOrder.vue"
 
 const router = new VueRouter({
   routes: [
@@ -52,7 +54,7 @@ const router = new VueRouter({
       meta: { secure: true },
       component: MainLayout,
       children: [
-        {path: '', name: "home", component: Home},
+        {path: '', name: "home", component: Products},
         {
           path: 'users',
           component: UsersLayout,
@@ -125,7 +127,9 @@ const router = new VueRouter({
           path: 'orders',
           component: UsersLayout,
           children: [
-            {path: 'create', name: "createOrder", component: EditOrder}
+            {path: '', name: 'orders', component: Orders},
+            {path: 'create', name: "createOrder", component: CreateOrder},
+            {path: 'show/:number', name: "showOrder", component: ShowOrder}
           ]
         }
       ]

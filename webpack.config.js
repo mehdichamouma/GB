@@ -22,6 +22,11 @@ module.exports = {
         publicPath: '/static/',
         filename: 'app.js'
       },
+      resolve: {
+        alias: {
+          vue: 'vue/dist/vue.js'
+        }
+      },
       devtool: '#eval-source-map',
       module: {
         loaders: [
