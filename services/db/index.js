@@ -79,7 +79,7 @@ export const updateUser = async (user) => {
 }
 
 export const getUserByNumber = async (number) => {
-  let results = await query("SELECT * FROM User WHERE USERNUMBER = ?", [number])
+  let results = await query("SELECT * FROM USER WHERE USERNUMBER = ?", [number])
   let userFromDb = results[0]
   if(userFromDb) {
     return new User({
@@ -96,13 +96,13 @@ export const getUserByNumber = async (number) => {
 }
 
 export const getAllUsers = async () => {
-  let users = await query("SELECT * FROM User")
+  let users = await query("SELECT * FROM USER")
   return users.map(toUser)
 }
 
 export const getUserByCredentials = async (email, password) => {
   let results = await query(
-    "SELECT * FROM User WHERE email = ? AND password = ?",
+    "SELECT * FROM USER WHERE email = ? AND password = ?",
     [email, password]
   )
   let userFromDb = results[0]
