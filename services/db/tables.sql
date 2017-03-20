@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* Nom de SGBD :  MySQL 5.0                                     */
-/* Date de cr�ation :  16/01/2017 17:27:33                      */
+/* Date de création :  19/01/2017 15:30:37                      */
 /*==============================================================*/
 
 
@@ -47,6 +47,7 @@ create table CONTAIN
    EFFTVA               float,
    UNITPRICE            float,
    PLACENUMBER          int,
+
    primary key (ORDERNUMBER, PRODUCTNUMBER)
 );
 
@@ -61,7 +62,7 @@ create table MANAGE
 );
 
 /*==============================================================*/
-/* Table : ORDERS                                              */
+/* Table : "ORDER"                                              */
 /*==============================================================*/
 create table ORDERS
 (
@@ -95,8 +96,8 @@ create table PRODUCT
 (
    PRODUCTNUMBER        int not null auto_increment,
    CATEGORYNUMBER       int not null,
+   SUBCATEGORYNUMBER    int,
    PROVIDERNUMBER       int not null,
-   SUBCATEGORYNUMBER    int not null,
    PLACENUMBER          int not null,
    PRODUCTNAME          text,
    PRODUCTUNIT          text,
@@ -143,6 +144,7 @@ create table REQUEST
 create table SUBCATEGORY
 (
    SUBCATEGORYNUMBER    int not null auto_increment,
+   CATEGORYNUMBER       int not null,
    SUBCATEGORYNAME      text,
    CATEGORYNUMBER       int not null,
    primary key (SUBCATEGORYNUMBER)
